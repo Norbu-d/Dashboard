@@ -76,19 +76,31 @@ A feature-rich, interactive dashboard for managing bespoke clothing customers, o
 
 ### Project Structure
 ```
-├── components/
-│   ├── CustomerTable.tsx      # Main customer table with all features
-│   ├── DashboardStats.tsx     # Dashboard statistics cards
-│   ├── Layout.tsx             # Main layout with theme
-│   └── Welcome.tsx            # Welcome screen animation
-├── pages/
+src/
+├── app/
 │   ├── api/
 │   │   └── customers/
-│   │       ├── index.ts       # Customer list API endpoint
+│   │       ├── customers.ts              # Main customers API
 │   │       └── [id]/
-│   │           └── orders.ts  # Customer orders API endpoint
-│   └── index.tsx              # Main dashboard page
-└── types/                     # TypeScript type definitions
+│   │           └── orders/
+│   │               └── orders.ts        # Orders API for specific customer
+│   ├── page.tsx                          # Main dashboard page
+│   └── _app.tsx                          # App initialization (Next.js custom App)
+│
+├── components/
+│   ├── CustomerTable.tsx                # Displays customer data in a table
+│   ├── OrdersTable.tsx                  # Displays order details for a customer
+│   ├── DashboardStats.tsx               # Dashboard overview metrics
+│   ├── Welcome.tsx                      # Welcome banner or message
+│   └── Layout.tsx                       # Page layout wrapper
+│
+├── lib/
+│   ├── mockData.ts                      # Mock data generation and helper functions
+│   └── theme.ts                         # Material-UI theme configuration
+│
+└── types/
+    └── theme.ts                         # Custom TypeScript types for theming
+
 ```
 
 ## 🎮 Usage Guide
