@@ -25,11 +25,11 @@ import {
   InputAdornment,
   Alert
 } from '@mui/material';
-import { 
-  Edit, 
-  Save, 
-  Cancel, 
-  KeyboardArrowDown, 
+import {
+  Edit,
+  Save,
+  Cancel,
+  KeyboardArrowDown,
   KeyboardArrowRight,
   Search as SearchIcon,
   Clear as ClearIcon
@@ -55,7 +55,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25); // Updated default to show more customers
+  const [rowsPerPage, setRowsPerPage] = useState(25);
   const [sortBy, setSortBy] = useState<keyof Customer>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [editingCustomer, setEditingCustomer] = useState<string | null>(null);
@@ -64,42 +64,31 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [totalItems, setTotalItems] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  
-  // Refs for cleanup and request management
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounce search term with cleanup
   useEffect(() => {
-    // Clear existing timeout
-    if (searchTimeoutRef.current) {
-      clearTimeout(searchTimeoutRef.current);
-    }
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
 
     searchTimeoutRef.current = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
-      if (page !== 0) setPage(0); // Reset to first page when searching
-    }, 300); // Reduced from 500ms to 300ms for better UX
+      if (page !== 0) setPage(0);
+    }, 300);
 
     return () => {
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     };
   }, [searchTerm, page]);
 
   const fetchCustomers = useCallback(async () => {
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
+    if (abortControllerRef.current) abortControllerRef.current.abort();
 
-    // Create new abort controller
     abortControllerRef.current = new AbortController();
-    
+
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = new URLSearchParams({
         page: (page + 1).toString(),
@@ -112,16 +101,13 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
       const response = await fetch(`/api/customers?${params}`, {
         signal: abortControllerRef.current.signal
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch customers');
-      }
-      
+
+      if (!response.ok) throw new Error('Failed to fetch customers');
+
       const data = await response.json();
       setCustomers(data.customers);
       setTotalItems(data.pagination.totalItems);
     } catch (error: any) {
-      // Don't show error for aborted requests
       if (error.name !== 'AbortError') {
         console.error('Error fetching customers:', error);
         setError('Failed to load customers. Please try again.');
@@ -133,15 +119,9 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
 
   useEffect(() => {
     fetchCustomers();
-    
-    // Cleanup on unmount
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
     };
   }, [fetchCustomers]);
 
@@ -158,15 +138,10 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
         body: JSON.stringify({ customerId, status: editedStatus }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to update customer');
-      }
-      
-      // Optimistic update
-      setCustomers(prevCustomers => 
-        prevCustomers.map(c => 
-          c.id === customerId ? { ...c, status: editedStatus } : c
-        )
+      if (!response.ok) throw new Error('Failed to update customer');
+
+      setCustomers(prev =>
+        prev.map(c => (c.id === customerId ? { ...c, status: editedStatus } : c))
       );
     } catch (error) {
       console.error('Error updating customer:', error);
@@ -194,7 +169,6 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
     onCustomerSelect(customerId);
   }, [onCustomerSelect]);
 
-  // Memoized functions for better performance
   const getStatusColor = useMemo(() => (status: string) => {
     switch (status) {
       case 'active': return '#10b981';
@@ -216,20 +190,20 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
     return new Date(dateString).toLocaleDateString();
   }, []);
 
-  // Memoized table rows for better performance
   const tableRows = useMemo(() => {
     return customers.map((customer) => (
       <React.Fragment key={customer.id}>
-        <TableRow 
-          hover 
-          sx={{ 
-            '&:hover': { background: 'rgba(59, 130, 246, 0.1)' },
+        <TableRow
+          hover
+          sx={{
+            transition: 'background-color 0.3s ease',
+            '&:hover': { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
             backgroundColor: selectedCustomer === customer.id ? 'rgba(59, 130, 246, 0.2)' : 'inherit'
           }}
         >
           <TableCell>
-            <IconButton 
-              size="small" 
+            <IconButton
+              size="small"
               onClick={() => handleRowClick(customer.id)}
               sx={{ color: '#f8fafc' }}
             >
@@ -251,13 +225,13 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
               </Box>
             </Box>
           </TableCell>
-          <TableCell>
+          <TableCell sx={{ color: '#f8fafc' }}>
             {editingCustomer === customer.id ? (
               <FormControl size="small">
                 <Select
                   value={editedStatus}
                   onChange={(e) => setEditedStatus(e.target.value as typeof editedStatus)}
-                  sx={{ 
+                  sx={{
                     minWidth: 120,
                     color: '#f8fafc',
                     '& .MuiSelect-icon': {
@@ -274,7 +248,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
               <Chip
                 label={customer.status}
                 size="small"
-                sx={{ 
+                sx={{
                   backgroundColor: getStatusColor(customer.status),
                   color: 'white',
                   textTransform: 'capitalize'
@@ -282,7 +256,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
               />
             )}
           </TableCell>
-          <TableCell>
+          <TableCell sx={{ color: '#f8fafc' }}>
             <Typography variant="body2" color="#0ea5e9">
               {customer.email}
             </Typography>
@@ -296,7 +270,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
           <TableCell align="right" sx={{ color: '#f8fafc' }}>
             {formatCurrency(customer.revenue)}
           </TableCell>
-          <TableCell>
+          <TableCell sx={{ color: '#f8fafc' }}>
             {editingCustomer === customer.id ? (
               <>
                 <IconButton onClick={() => handleSave(customer.id)} sx={{ color: '#10b981' }}>
@@ -313,20 +287,11 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
             )}
           </TableCell>
         </TableRow>
-        
-        {/* Expandable row for orders */}
         <TableRow>
-          <TableCell 
-            colSpan={7} 
-            sx={{ 
-              p: 0, 
-              border: 0,
-              backgroundColor: selectedCustomer === customer.id ? 'rgba(59, 130, 246, 0.05)' : 'inherit'
-            }}
-          >
+          <TableCell colSpan={7} sx={{ p: 0, border: 0, backgroundColor: selectedCustomer === customer.id ? 'rgba(59, 130, 246, 0.05)' : 'inherit' }}>
             <Collapse in={selectedCustomer === customer.id} timeout="auto" unmountOnExit>
               <Box sx={{ p: 3, backgroundColor: 'rgba(15, 23, 42, 0.8)' }}>
-                <Typography variant="h6" gutterBottom sx={{ 
+                <Typography variant="h6" gutterBottom sx={{
                   color: '#f8fafc',
                   fontWeight: 'bold',
                   mb: 2,
@@ -353,9 +318,9 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
       borderRadius: '20px',
       mb: 4,
       overflow: 'hidden',
-      fontSize: '1.1rem'
+      fontSize: '1.1rem',
+      boxShadow: '0 6px 20px rgba(0,0,0,0.3)'
     }}>
-      {/* Search Bar */}
       <Box sx={{ p: 3, borderBottom: '1px solid rgba(51, 65, 85, 0.5)' }}>
         <TextField
           fullWidth
@@ -423,8 +388,8 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
                   Customer
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Contact</TableCell>
+              <TableCell sx={{ color: '#f8fafc' }}>Status</TableCell>
+              <TableCell sx={{ color: '#f8fafc' }}>Contact</TableCell>
               <TableCell align="right">
                 <TableSortLabel
                   active={sortBy === 'orderCount'}
@@ -445,7 +410,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
                   Revenue
                 </TableSortLabel>
               </TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell sx={{ color: '#f8fafc' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
