@@ -136,7 +136,8 @@ const generateMockCustomers = (count: number): Customer[] => {
   return [...knownCustomers, ...randomCustomers];
 };
 
-export const mockCustomers = generateMockCustomers(75);
+// Updated to generate 100 customers (96 random + 4 known customers)
+export const mockCustomers = generateMockCustomers(96);
 
 // Log known customer IDs for debugging
 console.log('Known customer IDs:', mockCustomers.slice(0, 4).map(c => ({ id: c.id, name: c.name })));

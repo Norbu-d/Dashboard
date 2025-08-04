@@ -55,7 +55,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(25); // Updated default to show more customers
   const [sortBy, setSortBy] = useState<keyof Customer>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [editingCustomer, setEditingCustomer] = useState<string | null>(null);
@@ -470,7 +470,7 @@ export default function CustomerTable({ onCustomerSelect, selectedCustomer }: Cu
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[5, 10, 25, 50, 75, 100]}
         component="div"
         count={totalItems}
         rowsPerPage={rowsPerPage}
